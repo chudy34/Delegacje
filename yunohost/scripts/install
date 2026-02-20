@@ -1,0 +1,96 @@
+#!/bin/bash
+# YunoHost install script for Delegacje SaaS
+# shellcheck disable=SC2034
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+# ── Install Node.js 20 ───────────────────────────────
+ynh_exec_warn_less curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+ynh_package_install nodejs
+
+# ── Setup directories ────────────────────────────────
+mkdir -p "$data_dir/uploads" "$data_dir/logs"
+chown -R "$app:$app" "$data_dir"
+
+# ── Setup PostgreSQL ─────────────────────────────────
+ynh_psql_setup_db --db_user="$app" --db_name="$app" --db_pwd="$db_pwd"
+
+# ── Generate secrets ─────────────────────────────────
+jwt_secret=$(openssl rand -base64 48)
+encryption_key=$(openssl rand -base64 32)
+
+ynh_app_setting_set --app="$app" --key="jwt_secret" --value="$jwt_secret"
+ynh_app_setting_set --app="$app" --key="encryption_key" --value="$encryption_key"
+
+# ── Copy app source ──────────────────────────────────
+# YunoHost umieszcza źródła aplikacji w ../conf/app/
+# Po instalacji ze źródła z GitHub pliki są kopiowane przez ynh_setup_source
+ynh_setup_source --dest_dir="$install_dir"
+chown -R "$app:$app" "$install_dir"
+
+# ── Backend setup ────────────────────────────────────
+pushd "$install_dir/backend"
+    ynh_exec_as "$app" npm ci --only=production
+    ynh_exec_as "$app" npx prisma generate
+
+    # Wygeneruj .env dla backendu
+    cat > .env << EOF
+NODE_ENV=production
+PORT=$port_backend
+DATABASE_URL=postgresql://$app:$db_pwd@localhost:5432/$app
+JWT_SECRET=$jwt_secret
+JWT_EXPIRES_IN=7d
+ENCRYPTION_KEY=$encryption_key
+CORS_ORIGIN=https://$domain
+AI_PROVIDER=$ai_provider
+GEMINI_API_KEY=${gemini_api_key:-}
+UPLOAD_DIR=$data_dir/uploads
+LOG_DIR=$data_dir/logs
+EOF
+
+    # Uruchom migracje
+    ynh_exec_as "$app" npx prisma migrate deploy
+
+    # Build TypeScript
+    ynh_exec_as "$app" npm run build
+popd
+
+# ── Frontend setup ───────────────────────────────────
+pushd "$install_dir/frontend"
+    ynh_exec_as "$app" npm ci
+
+    # NEXT_PUBLIC_API_URL musi wskazywać na wewnętrzny port backendu
+    # bo jest używany przez Next.js rewrite proxy (server-side)
+    cat > .env.production << EOF
+NEXT_PUBLIC_API_URL=http://localhost:$port_backend
+PORT=$port_frontend
+NODE_ENV=production
+EOF
+
+    ynh_exec_as "$app" npm run build
+
+    # Standalone build wymaga plików statycznych w odpowiednim miejscu
+    cp -r .next/static .next/standalone/.next/static
+    cp -r public .next/standalone/public 2>/dev/null || true
+popd
+
+# ── systemd services ─────────────────────────────────
+ynh_add_systemd_config --service="${app}-backend" --template="backend.service"
+ynh_add_systemd_config --service="${app}-frontend" --template="frontend.service"
+
+# ── Nginx config ─────────────────────────────────────
+ynh_add_nginx_config
+
+# ── Start services ───────────────────────────────────
+ynh_systemd_action --service_name="${app}-backend" \
+    --action="start" \
+    --log_path="$data_dir/logs/backend.log" \
+    --timeout=60
+
+ynh_systemd_action --service_name="${app}-frontend" \
+    --action="start" \
+    --log_path="$data_dir/logs/frontend.log" \
+    --timeout=60
+
+ynh_print_info "Delegacje SaaS zainstalowane! Dostępne pod: https://$domain"

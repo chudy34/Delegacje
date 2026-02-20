@@ -1,0 +1,28 @@
+[Unit]
+Description=Delegacje Frontend (Next.js) (__APP__)
+After=network.target __APP__-backend.service
+Wants=__APP__-backend.service
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+WorkingDirectory=__INSTALL_DIR__/frontend/.next/standalone
+Environment=PORT=__PORT_FRONTEND__
+Environment=HOSTNAME=127.0.0.1
+Environment=NODE_ENV=production
+EnvironmentFile=__INSTALL_DIR__/frontend/.env.production
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:__DATA_DIR__/logs/frontend.log
+StandardError=append:__DATA_DIR__/logs/frontend-error.log
+
+# Security
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=__DATA_DIR__ __INSTALL_DIR__/frontend/.next
+
+[Install]
+WantedBy=multi-user.target
