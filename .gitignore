@@ -1,0 +1,61 @@
+# ── Dependencies ─────────────────────────────
+node_modules/
+.npm
+
+# ── Build outputs ────────────────────────────
+dist/
+build/
+.next/
+out/
+
+# ── Environment files ────────────────────────
+.env
+.env.local
+.env.production
+.env.development
+!.env.example
+
+# ── Logs ────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ── Database ─────────────────────────────────
+*.db
+*.sqlite
+
+# ── Uploads (runtime data) ───────────────────
+backend/uploads/
+
+# ── OS ──────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editor ──────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── TypeScript ───────────────────────────────
+*.tsbuildinfo
+
+# ── Next.js ──────────────────────────────────
+.next/
+.vercel
+
+# ── Prisma ───────────────────────────────────
+# Nie ignoruj migrations! Są potrzebne do deploy
+# backend/prisma/migrations/
+
+# ── SSL certs (wgraj ręcznie) ─────────────────
+nginx/certs/*.crt
+nginx/certs/*.key
+nginx/certs/*.pem
+!nginx/certs/.gitkeep
+
+# ── YunoHost (runtime) ───────────────────────
+yunohost/conf/app/
+
+# ── Test coverage ────────────────────────────
+coverage/

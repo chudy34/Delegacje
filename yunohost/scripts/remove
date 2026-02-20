@@ -1,0 +1,24 @@
+#!/bin/bash
+# YunoHost remove script for Delegacje SaaS
+# shellcheck disable=SC2034
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+# ── Stop and remove services ──────────────────
+ynh_systemd_action --service_name="${app}-backend" --action="stop"
+ynh_systemd_action --service_name="${app}-frontend" --action="stop"
+
+ynh_remove_systemd_config --service="${app}-backend"
+ynh_remove_systemd_config --service="${app}-frontend"
+
+# ── Remove nginx config ───────────────────────
+ynh_remove_nginx_config
+
+# ── Remove PostgreSQL ─────────────────────────
+ynh_psql_remove_db --db_user="$app" --db_name="$app"
+
+# ── Files are removed automatically by YunoHost
+# (install_dir and data_dir handled by resource system)
+
+ynh_print_info "Delegacje SaaS has been removed."

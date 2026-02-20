@@ -1,0 +1,15 @@
+# YunoHost sources configuration
+# https://yunohost.org/en/packaging_apps_sources
+
+[main]
+# URL do archiwum z kodem źródłowym (GitHub release)
+# Zaktualizuj URL i sha256 przy każdym nowym release
+url = "https://github.com/chudy34/Delegacje/archive/refs/heads/main.tar.gz"
+sha256 = "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
+
+# Pliki do wyodrebnienia (cały projekt trafi do install_dir)
+format = "tar.gz"
+extract = true
+
+# Pliki/katalogi do POMINIĘCIA podczas kopiowania do install_dir
+autoupdate.strategy = "latest_github_tag"
