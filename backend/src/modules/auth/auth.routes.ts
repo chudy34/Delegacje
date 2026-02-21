@@ -210,7 +210,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
 // POST /api/v1/auth/logout
 router.post('/logout', authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as unknown as AuthenticatedRequest;
 
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
