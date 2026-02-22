@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import { EncryptedData } from '@/types/index';
+import { EncryptedData } from '../types/index';
 
 const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32; // bytes for AES-256

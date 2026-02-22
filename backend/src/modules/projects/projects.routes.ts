@@ -6,14 +6,14 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { validate } from '@/middleware/validate.middleware';
-import { AuthenticatedRequest } from '@/types/index';
-import { calculateProjectBalance } from '@/core/calculateProjectBalance';
-import { calculateSalaryNet, TAX_RATES_2024_2025 } from '@/core/calculateSalaryNet';
-import { encryptNumber, decryptNumber } from '@/utils/encryption';
-import { getCountryByCode } from '@/core/countries';
-import logger from '@/utils/logger';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { validate } from '../middleware/validate.middleware';
+import { AuthenticatedRequest } from '../types/index';
+import { calculateProjectBalance } from '../core/calculateProjectBalance';
+import { calculateSalaryNet, TAX_RATES_2024_2025 } from '../core/calculateSalaryNet';
+import { encryptNumber, decryptNumber } from '../utils/encryption';
+import { getCountryByCode } from '../core/countries';
+import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -47,8 +47,8 @@ const listProjectsSchema = z.object({
 
 // GET /api/v1/projects
 router.get('/', validate(listProjectsSchema, 'query'), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
-  const { status, page, limit } = req.query as unknown as z.infer<typeof listProjectsSchema>;
+  const authReq = req as AuthenticatedRequest;
+  const { status, page, limit } = req.query as z.infer<typeof listProjectsSchema>;
 
   try {
     const where = {
@@ -102,7 +102,7 @@ router.get('/', validate(listProjectsSchema, 'query'), async (req, res: Response
 
 // POST /api/v1/projects
 router.post('/', validate(createProjectSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof createProjectSchema>;
 
   try {
@@ -184,7 +184,7 @@ router.post('/', validate(createProjectSchema), async (req, res: Response) => {
 
 // GET /api/v1/projects/:id
 router.get('/:id', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const project = await prisma.project.findFirst({
@@ -205,7 +205,7 @@ router.get('/:id', async (req, res: Response) => {
 
 // PUT /api/v1/projects/:id
 router.put('/:id', validate(updateProjectSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof updateProjectSchema>;
 
   try {
@@ -268,7 +268,7 @@ router.put('/:id', validate(updateProjectSchema), async (req, res: Response) => 
 
 // POST /api/v1/projects/:id/close
 router.post('/:id/close', validate(closeProjectSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof closeProjectSchema>;
 
   try {
@@ -309,7 +309,7 @@ router.post('/:id/close', validate(closeProjectSchema), async (req, res: Respons
 
 // GET /api/v1/projects/:id/balance
 router.get('/:id/balance', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const project = await prisma.project.findFirst({
@@ -362,7 +362,7 @@ router.get('/:id/balance', async (req, res: Response) => {
 
 // DELETE /api/v1/projects/:id
 router.delete('/:id', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const existing = await prisma.project.findFirst({

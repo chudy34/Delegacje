@@ -6,10 +6,10 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { validate } from '@/middleware/validate.middleware';
-import { AuthenticatedRequest } from '@/types/index';
-import logger from '@/utils/logger';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { validate } from '../middleware/validate.middleware';
+import { AuthenticatedRequest } from '../types/index';
+import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -32,8 +32,8 @@ const listAdvancesSchema = z.object({
 
 // GET /api/v1/advances
 router.get('/', validate(listAdvancesSchema, 'query'), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
-  const { projectId, page, limit } = req.query as unknown as z.infer<typeof listAdvancesSchema>;
+  const authReq = req as AuthenticatedRequest;
+  const { projectId, page, limit } = req.query as z.infer<typeof listAdvancesSchema>;
 
   try {
     const where = {
@@ -65,7 +65,7 @@ router.get('/', validate(listAdvancesSchema, 'query'), async (req, res: Response
 
 // POST /api/v1/advances
 router.post('/', validate(createAdvanceSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof createAdvanceSchema>;
 
   try {
@@ -102,7 +102,7 @@ router.post('/', validate(createAdvanceSchema), async (req, res: Response) => {
 
 // DELETE /api/v1/advances/:id (soft delete)
 router.delete('/:id', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const existing = await prisma.advance.findFirst({

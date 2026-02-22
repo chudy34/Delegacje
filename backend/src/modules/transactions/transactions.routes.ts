@@ -6,10 +6,10 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { PrismaClient, TransactionCategory } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { validate } from '@/middleware/validate.middleware';
-import { AuthenticatedRequest } from '@/types/index';
-import logger from '@/utils/logger';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { validate } from '../middleware/validate.middleware';
+import { AuthenticatedRequest } from '../types/index';
+import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -42,9 +42,9 @@ const listTransactionsSchema = z.object({
 
 // GET /api/v1/transactions
 router.get('/', validate(listTransactionsSchema, 'query'), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const { projectId, category, includeDeleted, page, limit } =
-    req.query as unknown as z.infer<typeof listTransactionsSchema>;
+    req.query as z.infer<typeof listTransactionsSchema>;
 
   try {
     const where = {
@@ -82,7 +82,7 @@ router.get('/', validate(listTransactionsSchema, 'query'), async (req, res: Resp
 
 // POST /api/v1/transactions
 router.post('/', validate(createTransactionSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof createTransactionSchema>;
 
   try {
@@ -124,7 +124,7 @@ router.post('/', validate(createTransactionSchema), async (req, res: Response) =
 
 // GET /api/v1/transactions/:id
 router.get('/:id', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const transaction = await prisma.transaction.findFirst({
@@ -146,7 +146,7 @@ router.get('/:id', async (req, res: Response) => {
 
 // PUT /api/v1/transactions/:id
 router.put('/:id', validate(updateTransactionSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof updateTransactionSchema>;
 
   try {
@@ -182,7 +182,7 @@ router.put('/:id', validate(updateTransactionSchema), async (req, res: Response)
 
 // DELETE /api/v1/transactions/:id (soft delete)
 router.delete('/:id', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const existing = await prisma.transaction.findFirst({

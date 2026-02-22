@@ -5,8 +5,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { AuthenticatedRequest, JWTPayload } from '@/types/index';
-import logger from '@/utils/logger';
+import { AuthenticatedRequest, JWTPayload } from '../types/index';
+import logger from '../utils/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {

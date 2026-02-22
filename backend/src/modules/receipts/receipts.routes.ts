@@ -10,11 +10,11 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { validate } from '@/middleware/validate.middleware';
-import { AuthenticatedRequest } from '@/types/index';
-import { generateDocumentFingerprint, detectDuplicateDocument } from '@/core/detectDuplicateDocument';
-import logger from '@/utils/logger';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { validate } from '../middleware/validate.middleware';
+import { AuthenticatedRequest } from '../types/index';
+import { generateDocumentFingerprint, detectDuplicateDocument } from '../core/detectDuplicateDocument';
+import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -27,7 +27,7 @@ const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE ?? '52428800'); // 50MB
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    const authReq = req as unknown as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
     const dir = path.join(UPLOAD_DIR, authReq.userId);
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
@@ -64,7 +64,7 @@ const uploadQuerySchema = z.object({
 
 // GET /api/v1/receipts
 router.get('/', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const projectId = req.query.projectId as string | undefined;
   const page = parseInt((req.query.page as string) ?? '1');
   const limit = parseInt((req.query.limit as string) ?? '20');
@@ -117,7 +117,7 @@ router.post(
   '/upload',
   upload.single('file'),
   async (req, res: Response) => {
-    const authReq = req as unknown as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
 
     if (!req.file) {
       res.status(400).json({ success: false, error: 'Brak pliku w żądaniu.' });
@@ -170,7 +170,7 @@ router.post(
     } catch (err) {
       // Cleanup file on error
       if (req.file?.path) {
-        fs.unlinkSync(req.file.path);
+        fs.unlinkSync(req.file.path).toString();
       }
       logger.error('Upload receipt error', { error: err });
       res.status(500).json({ success: false, error: 'Błąd serwera podczas przesyłania.' });
@@ -180,7 +180,7 @@ router.post(
 
 // GET /api/v1/receipts/:id
 router.get('/:id', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const receipt = await prisma.receipt.findFirst({
@@ -202,7 +202,7 @@ router.get('/:id', async (req, res: Response) => {
 
 // POST /api/v1/receipts/:id/process (re-process)
 router.post('/:id/process', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const receipt = await prisma.receipt.findFirst({
@@ -233,7 +233,7 @@ router.post('/:id/process', async (req, res: Response) => {
 
 // GET /api/v1/receipts/:id/duplicate-check
 router.get('/:id/duplicate-check', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const receipt = await prisma.receipt.findFirst({
@@ -307,7 +307,7 @@ async function processReceiptAsync(
 
     // OCR step (lazy import to avoid startup cost)
     try {
-      const { runOCR } = await import('@/utils/ocr');
+      const { runOCR } = await import('../utils/ocr');
       const ocrResult = await runOCR(filePath);
       ocrText = ocrResult.text;
       ocrLanguage = ocrResult.language;
@@ -325,7 +325,7 @@ async function processReceiptAsync(
 
     if (ocrText) {
       try {
-        const { extractReceiptData } = await import('@/utils/aiExtractor');
+        const { extractReceiptData } = await import('../utils/aiExtractor');
         const aiResult = await extractReceiptData(ocrText, filePath);
         invoiceNumber = aiResult.invoiceNumber;
         vendorName = aiResult.vendorName;

@@ -8,10 +8,10 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { validate } from '@/middleware/validate.middleware';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { AuthenticatedRequest, JWTPayload } from '@/types/index';
-import logger from '@/utils/logger';
+import { validate } from '../middleware/validate.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { AuthenticatedRequest, JWTPayload } from '../types/index';
+import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -210,7 +210,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
 // POST /api/v1/auth/logout
 router.post('/logout', authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');

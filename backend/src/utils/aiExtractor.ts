@@ -5,7 +5,7 @@
  */
 
 import logger from './logger';
-import { AIExtractionResult, AIProvider } from '@/types/index';
+import { AIExtractionResult, AIProvider } from '../types/index';
 
 const AI_PROVIDER = (process.env.AI_PROVIDER ?? 'none') as AIProvider;
 

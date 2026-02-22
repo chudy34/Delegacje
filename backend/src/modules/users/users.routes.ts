@@ -7,10 +7,10 @@ import { Router, Response } from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { PrismaClient, ContractType } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { validate } from '@/middleware/validate.middleware';
-import { AuthenticatedRequest } from '@/types/index';
-import logger from '@/utils/logger';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { validate } from '../middleware/validate.middleware';
+import { AuthenticatedRequest } from '../types/index';
+import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -40,7 +40,7 @@ const updateSettingsSchema = z.object({
 
 // GET /api/v1/users/me
 router.get('/me', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const user = await prisma.user.findUnique({
@@ -74,7 +74,7 @@ router.get('/me', async (req, res: Response) => {
 
 // PUT /api/v1/users/me
 router.put('/me', validate(updateProfileSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof updateProfileSchema>;
 
   try {
@@ -133,7 +133,7 @@ router.put('/me', validate(updateProfileSchema), async (req, res: Response) => {
 
 // PUT /api/v1/users/me/settings
 router.put('/me/settings', validate(updateSettingsSchema), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const body = req.body as z.infer<typeof updateSettingsSchema>;
 
   try {

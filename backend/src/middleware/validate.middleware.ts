@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { ZodSchema, ZodError } from 'zod';
-import logger from '@/utils/logger';
+import logger from '../utils/logger';
 
 type ValidationTarget = 'body' | 'query' | 'params';
 

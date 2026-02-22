@@ -7,9 +7,9 @@ import { Router, Response } from 'express';
 import { z } from 'zod';
 import multer from 'multer';
 import { PrismaClient, TransactionCategory } from '@prisma/client';
-import { authMiddleware } from '@/middleware/auth.middleware';
-import { AuthenticatedRequest, CSVColumnMapping, CSVClassificationRule } from '@/types/index';
-import logger from '@/utils/logger';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { AuthenticatedRequest, CSVColumnMapping, CSVClassificationRule } from '../types/index';
+import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -144,7 +144,7 @@ function classifyTransaction(
 
 // POST /api/v1/import/csv
 router.post('/csv', csvUpload.single('file'), async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   if (!req.file) {
     res.status(400).json({ success: false, error: 'Brak pliku CSV.' });
@@ -306,7 +306,7 @@ router.post('/csv', csvUpload.single('file'), async (req, res: Response) => {
 
 // GET /api/v1/import/mappings
 router.get('/mappings', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
 
   try {
     const user = await prisma.user.findUnique({
@@ -331,7 +331,7 @@ router.get('/mappings', async (req, res: Response) => {
 
 // PUT /api/v1/import/mappings
 router.put('/mappings', async (req, res: Response) => {
-  const authReq = req as unknown as AuthenticatedRequest;
+  const authReq = req as AuthenticatedRequest;
   const { columnMapping, classificationRules } = req.body as {
     columnMapping?: CSVColumnMapping;
     classificationRules?: CSVClassificationRule[];

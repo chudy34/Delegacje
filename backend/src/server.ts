@@ -1,4 +1,3 @@
-import 'module-alias/register';
 /**
  * server.ts
  * Main Express application server
